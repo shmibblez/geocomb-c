@@ -10,17 +10,18 @@
 
 class Phex;
 
-class Icosahedron {
+class CPP_Icosahedron {
 
 public:
   const std::vector<Triangle> tris;
   const ico::map_orientation mo;
   const ico::rotation_method rm;
-  Icosahedron(ico::map_orientation orientation = ico::map_orientation::ECEF,
-              ico::rotation_method rotation = ico::rotation_method::gnomonic);
+  CPP_Icosahedron(
+      ico::map_orientation orientation = ico::map_orientation::ECEF,
+      ico::rotation_method rotation = ico::rotation_method::gnomonic);
 
-  typedef std::vector<std::vector<GPoint3>> all_icosahedron_points;
-  typedef std::vector<std::vector<GPoint3>> lazy_icosahedron_points;
+  typedef std::vector<std::vector<CPP_GPoint3>> all_icosahedron_points;
+  typedef std::vector<std::vector<CPP_GPoint3>> lazy_icosahedron_points;
 
   struct hash_properties {
     int res;
@@ -58,33 +59,34 @@ public:
    * generate point from coordinates (degrees)
    * @param lat latitude
    * @param lon longitude */
-  Point3 point_from_coords(long double lat, long double lon) const;
+  CPP_Point3 point_from_coords(long double lat, long double lon) const;
 
   /**
    * @param p point to generate hash for
    * @param res resolution
    * @returns hash properties of containing phex
    **/
-  hash_properties hash(Point3 p, int res);
+  hash_properties hash(CPP_Point3 p, int res);
 
   /**
    * @param p point
    * @param res resolution
    * @returns lazily generated points around p
    **/
-  std::vector<std::vector<GPoint3>> lazy_points_around(Point3 p, int res) const;
+  std::vector<std::vector<CPP_GPoint3>> lazy_points_around(CPP_Point3 p,
+                                                       int res) const;
 
   /**
    * @param p point to test
    * @returns icosahedron triangle containing p
    **/
-  Triangle containing_triangle(Point3 p) const;
+  Triangle containing_triangle(CPP_Point3 p) const;
 
   /**
    * @param hash hexmap hash in format res|row|col
    * @returns point referenced by hash
    **/
-  GPoint3 parse_hash(Icosahedron::hash_properties hash) const;
+  CPP_GPoint3 parse_hash(CPP_Icosahedron::hash_properties hash) const;
 
   /**
    * @param res resolution
@@ -104,7 +106,7 @@ public:
    * @param res resolution
    * @returns phex for res containing p
    **/
-  Phex not_lazy_containing_phex(Point3 p, int res) const;
+  Phex not_lazy_containing_phex(CPP_Point3 p, int res) const;
 };
 
 #endif

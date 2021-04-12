@@ -11,19 +11,20 @@ using std::acos;
 using std::atan2;
 using std::sqrt;
 
-GPoint3::GPoint3(long double x, long double y, long double z, int res, int row,
-                 int col, ico::map_orientation mo, ico::rotation_method rm,
-                 bool is_pc, int tri_num)
-    : Point3::Point3(x, y, z, is_pc, tri_num), res(res), row(row), col(col),
-      mo(mo), rm(rm) {}
+CPP_GPoint3::CPP_GPoint3(long double x, long double y, long double z, int res,
+                         int row, int col, ico::map_orientation mo,
+                         ico::rotation_method rm, bool is_pc, int tri_num)
+    : CPP_Point3::CPP_Point3(x, y, z, is_pc, tri_num), res(res), row(row),
+      col(col), mo(mo), rm(rm) {}
 
-GPoint3::GPoint3()
-    : Point3::Point3(std::numeric_limits<long double>::infinity(),
-                     std::numeric_limits<long double>::infinity(),
-                     std::numeric_limits<long double>::infinity(), false, -1),
+CPP_GPoint3::CPP_GPoint3()
+    : CPP_Point3::CPP_Point3(std::numeric_limits<long double>::infinity(),
+                             std::numeric_limits<long double>::infinity(),
+                             std::numeric_limits<long double>::infinity(),
+                             false, -1),
       res(-1), row(-1), col(-1) {}
 
-bool GPoint3::is_phex_center(const int res, const int row, const int col) {
+bool CPP_GPoint3::is_phex_center(const int res, const int row, const int col) {
   const int nd = hexmapf::num_divisions(res);
   if (row == 0 || row == nd * 3) {
     return true;
@@ -50,7 +51,7 @@ bool GPoint3::is_phex_center(const int res, const int row, const int col) {
 
 Quaternion::Quaternion(long double x, long double y, long double z,
                        long double w)
-    : Point3(x, y, z), w(w) {}
+    : CPP_Point3(x, y, z), w(w) {}
 
 void Quaternion::unit() {
   long double mag = this->mag();
@@ -63,15 +64,15 @@ void Quaternion::unit() {
 long double Quaternion::mag() { return sqrt(x * x + y * y + z * z + w * w); }
 
 void Quaternion::multiply(const Quaternion &q) {
-  Point3 a(x, y, z);
-  Point3 b(q.x, q.y, q.z);
-  Point3 v1 = a;
+  CPP_Point3 a(x, y, z);
+  CPP_Point3 b(q.x, q.y, q.z);
+  CPP_Point3 v1 = a;
   v1.cross(b);
-  Point3 v2 = b;
+  CPP_Point3 v2 = b;
   v2.mult_by(w);
-  Point3 v3 = a;
+  CPP_Point3 v3 = a;
   v3.mult_by(q.w);
-  Point3 v = v1;
+  CPP_Point3 v = v1;
   v.add(v2);
   v.add(v3);
   x = v.x;
@@ -80,13 +81,13 @@ void Quaternion::multiply(const Quaternion &q) {
   w = w * q.w - a.dot(b);
 }
 
-Point3::Point3(long double x, long double y, long double z, bool is_pc,
-               int tri_num)
+CPP_Point3::CPP_Point3(long double x, long double y, long double z, bool is_pc,
+                       int tri_num)
     : x(x), y(y), z(z), tri_num(tri_num), is_pc(is_pc) {}
 
-Point3::~Point3() {}
+CPP_Point3::~CPP_Point3() {}
 
-long double Point3::get_radius() {
+long double CPP_Point3::get_radius() {
   return sqrt(this->x * this->x + this->y * this->y + this->z * this->z);
 }
 
@@ -102,7 +103,7 @@ long double Point3::get_radius() {
  *   = arcsin(z / r) * 360 / 2π
  **/
 
-long double Point3::get_lat() {
+long double CPP_Point3::get_lat() {
   const long double r = this->get_radius();
   if (r == 0) {
     return 0;
@@ -110,11 +111,11 @@ long double Point3::get_lat() {
   return 90 - acos(this->z / r) * (180 / constants::PI);
 }
 
-long double Point3::get_lon() {
+long double CPP_Point3::get_lon() {
   return atan2(this->y, this->x) * (180 / constants::PI);
 }
 
-long double Point3::angle_between(const Point3 &p) const {
+long double CPP_Point3::angle_between(const CPP_Point3 &p) const {
   long double inner = this->dot(p) / (this->mag() * p.mag());
   if (inner > 1.0) {
     inner = 1.0;
@@ -127,7 +128,7 @@ long double Point3::angle_between(const Point3 &p) const {
  * @param around vec to rotate around -> vec is from origin to point
  * @param rad rads to rotate
  * @note modifies obj **/
-void Point3::rotate(const Point3 &around, const long double &rad) {
+void CPP_Point3::rotate(const CPP_Point3 &around, const long double &rad) {
   Quaternion axis(around.x, around.y, around.z, 0.0);
   axis.unit();
   const long double num = sin(rad / 2.0);
@@ -143,29 +144,29 @@ void Point3::rotate(const Point3 &around, const long double &rad) {
   z = q.z;
 }
 
-long double Point3::mag() const {
+long double CPP_Point3::mag() const {
   const long double sq =
       std::sqrt(this->x * this->x + this->y * this->y + this->z * this->z);
   return sq;
 }
 
-void Point3::add(const Point3 &p) {
+void CPP_Point3::add(const CPP_Point3 &p) {
   x += p.x;
   y += p.y;
   z += p.z;
 }
 
-void Point3::subtract(const Point3 &p) {
+void CPP_Point3::subtract(const CPP_Point3 &p) {
   x -= p.x;
   y -= p.y;
   z -= p.z;
 }
 
-long double Point3::dot(const Point3 &p) const {
+long double CPP_Point3::dot(const CPP_Point3 &p) const {
   return x * p.x + y * p.y + z * p.z;
 }
 
-void Point3::cross(const Point3 &p) {
+void CPP_Point3::cross(const CPP_Point3 &p) {
   const long double t_x = this->x;
   const long double t_y = this->y;
   const long double t_z = this->z;
@@ -174,7 +175,7 @@ void Point3::cross(const Point3 &p) {
   this->z = t_x * p.y - p.x * t_y;
 }
 
-void Point3::unit() {
+void CPP_Point3::unit() {
   const long double mag = this->mag();
   if (mag == 0) {
     x = 0;
@@ -187,36 +188,36 @@ void Point3::unit() {
   }
 }
 
-void Point3::mult_by(const long double num) {
+void CPP_Point3::mult_by(const long double num) {
   x *= num;
   y *= num;
   z *= num;
 }
 
-void Point3::div_by(const long double num) {
+void CPP_Point3::div_by(const long double num) {
   x /= num;
   y /= num;
   z /= num;
 }
 
-long double Point3::distance(const Point3 &p) const {
+long double CPP_Point3::distance(const CPP_Point3 &p) const {
   return std::sqrt((x - p.x) * (x - p.x) + (y - p.y) * (y - p.y) +
                    (z - p.z) * (z - p.z));
 }
 
-void Point3::spheriphy() {
+void CPP_Point3::spheriphy() {
   this->unit();
   this->mult_by(constants::radius);
 }
 
-std::vector<Point3> Point3::spherify1D(std::vector<Point3> points) {
-  for (Point3 &p : points) {
+std::vector<CPP_Point3> CPP_Point3::spherify1D(std::vector<CPP_Point3> points) {
+  for (CPP_Point3 &p : points) {
     p.spheriphy();
   }
   return points;
 }
 
-bool Point3::on_opposite_side(const Point3 &p) const {
+bool CPP_Point3::on_opposite_side(const CPP_Point3 &p) const {
   return std::signbit(x) != std::signbit(p.x) ||
          std::signbit(y) != std::signbit(p.y) ||
          std::signbit(z) != std::signbit(p.z);
@@ -224,15 +225,15 @@ bool Point3::on_opposite_side(const Point3 &p) const {
   // return false;
 }
 
-bool Point3::is_valid() const {
+bool CPP_Point3::is_valid() const {
   return std::isfinite(x) && std::isfinite(y) && std::isfinite(z);
 }
 
-GPoint3 Point3::closest_point(std::vector<GPoint3> &points) const {
-  std::unique_ptr<GPoint3> closest;
+CPP_GPoint3 CPP_Point3::closest_point(std::vector<CPP_GPoint3> &points) const {
+  std::unique_ptr<CPP_GPoint3> closest;
   long double smallest_distance = std::numeric_limits<long double>::infinity();
   long double dist = 0;
-  for (GPoint3 &p : points) {
+  for (CPP_GPoint3 &p : points) {
     dist = this->distance(p);
     if (dist < smallest_distance) {
       smallest_distance = dist;
@@ -243,15 +244,15 @@ GPoint3 Point3::closest_point(std::vector<GPoint3> &points) const {
   return *closest;
 }
 
-GPoint3
-Point3::closest_point_2d(std::vector<std::vector<GPoint3>> &points_2d) const {
-  GPoint3 *closest = new GPoint3();
+CPP_GPoint3 CPP_Point3::closest_point_2d(
+    std::vector<std::vector<CPP_GPoint3>> &points_2d) const {
+  CPP_GPoint3 *closest = new CPP_GPoint3();
   long double smallest_distance =
       constants::radius * 20; // std::numeric_limits<long double>::infinity();
   long double dist = 0;
 
-  for (std::vector<GPoint3> &points : points_2d) {
-    for (GPoint3 &p : points) {
+  for (std::vector<CPP_GPoint3> &points : points_2d) {
+    for (CPP_GPoint3 &p : points) {
       if (p.is_pc) {
         dist = this->distance(p);
         if (dist < smallest_distance) {
@@ -263,12 +264,12 @@ Point3::closest_point_2d(std::vector<std::vector<GPoint3>> &points_2d) const {
   }
 
   // bit hacky, but for deleting allocated mem before leaving function
-  GPoint3 p_copy = *closest;
+  CPP_GPoint3 p_copy = *closest;
   delete closest;
   return p_copy;
 }
 
-void Point3::rotate_around_y(long double rads) {
+void CPP_Point3::rotate_around_y(long double rads) {
   const int o_x = this->x;
   this->x = this->x * cos(rads) + this->z * sin(rads);
   this->z = -o_x * sin(rads) + this->z * cos(rads);
@@ -278,19 +279,19 @@ void Point3::rotate_around_y(long double rads) {
  * GNOMONIC POINT GENERATION
  **/
 
-std::vector<Point3> Point3::all_side_points_gnomonic(const Point3 &above,
-                                                     const Point3 &below,
-                                                     int res) {
+std::vector<CPP_Point3>
+CPP_Point3::all_side_points_gnomonic(const CPP_Point3 &above,
+                                     const CPP_Point3 &below, int res) {
   const int nd = hexmapf::num_divisions(res);
-  std::vector<Point3> point_arr;
+  std::vector<CPP_Point3> point_arr;
   // vec from [above] to [below]
-  Point3 AB = below;
+  CPP_Point3 AB = below;
   AB.subtract(above);
   // unit AB
-  Point3 uAB = AB;
+  CPP_Point3 uAB = AB;
   uAB.unit();
   // vec between [above] and [below]
-  Point3 C = uAB;
+  CPP_Point3 C = uAB;
   C.mult_by(above.distance(below) / 2.0);
   C.add(above);
   // spherify
@@ -300,11 +301,11 @@ std::vector<Point3> Point3::all_side_points_gnomonic(const Point3 &above,
   const long double magC = C.mag();
   const long double alpha = above.angle_between(C);
   const long double magH = magC / std::cos(alpha);
-  Point3 A = above;
+  CPP_Point3 A = above;
   A.unit();
   A.mult_by(magH);
   A.is_pc = true;
-  Point3 B = below;
+  CPP_Point3 B = below;
   B.unit();
   B.mult_by(magH);
   B.is_pc = true;
@@ -322,7 +323,7 @@ std::vector<Point3> Point3::all_side_points_gnomonic(const Point3 &above,
     d = dist_unit * i;
     // set pointer's value
     // rotated.reset(&uAB);
-    Point3 rotated = uAB;
+    CPP_Point3 rotated = uAB;
     rotated.mult_by(d);
     rotated.add(A);
     // spheriphy point since gnomonic generates points between tri sides (along
@@ -335,10 +336,10 @@ std::vector<Point3> Point3::all_side_points_gnomonic(const Point3 &above,
   return point_arr;
 }
 
-Point3::lazy_side_points_result
-Point3::lazy_side_points_gnomonic(const Triangle &tri, const int center,
-                                  const int res, const int lazy_range,
-                                  int lower, int upper) {
+CPP_Point3::lazy_side_points_result
+CPP_Point3::lazy_side_points_gnomonic(const Triangle &tri, const int center,
+                                      const int res, const int lazy_range,
+                                      int lower, int upper) {
 
   const int nd = hexmapf::num_divisions(res);
   if (lower == -1) {
@@ -355,15 +356,15 @@ Point3::lazy_side_points_gnomonic(const Triangle &tri, const int center,
   }
 
   const std::function generate_side_points =
-      [&nd, &lower, &upper](const Point3 &top,
-                            const Point3 &bot) -> std::vector<Point3> {
-    std::vector<Point3> point_arr;
-    Point3 AB = bot;
+      [&nd, &lower, &upper](const CPP_Point3 &top,
+                            const CPP_Point3 &bot) -> std::vector<CPP_Point3> {
+    std::vector<CPP_Point3> point_arr;
+    CPP_Point3 AB = bot;
     AB.subtract(top);
-    Point3 uAB = AB;
+    CPP_Point3 uAB = AB;
     uAB.unit();
     // vec between above and below
-    Point3 C = uAB;
+    CPP_Point3 C = uAB;
     C.mult_by(top.distance(bot) / 2.0);
     C.add(top);
     C.spheriphy();
@@ -371,11 +372,11 @@ Point3::lazy_side_points_gnomonic(const Triangle &tri, const int center,
     const long double magC = C.mag();
     const long double alpha = top.angle_between(C);
     const long double magH = magC / std::cos(alpha);
-    Point3 A = top;
+    CPP_Point3 A = top;
     A.unit();
     A.mult_by(magH);
     A.is_pc = true;
-    Point3 B = bot;
+    CPP_Point3 B = bot;
     B.unit();
     B.mult_by(magH);
     B.is_pc = true;
@@ -385,7 +386,7 @@ Point3::lazy_side_points_gnomonic(const Triangle &tri, const int center,
     long double d;
     for (int c = lower; c <= upper; c++) {
       d = dist_unit * c;
-      Point3 rotated = uAB;
+      CPP_Point3 rotated = uAB;
       rotated.mult_by(d);
       rotated.add(A);
       // spheriphy point since gnomonic generates points between tri sides
@@ -397,26 +398,25 @@ Point3::lazy_side_points_gnomonic(const Triangle &tri, const int center,
     return point_arr;
   };
 
-  const Point3 topL = tri.direction == tri::pointing::UP ? tri.A : tri.B;
-  const Point3 botL = tri.direction == tri::pointing::UP ? tri.C : tri.A;
-  const Point3 topR = tri.direction == tri::pointing::UP ? tri.A : tri.C;
-  const Point3 botR = tri.direction == tri::pointing::UP ? tri.B : tri.A;
-  const std::vector<Point3> pointsL = generate_side_points(topL, botL);
-  const std::vector<Point3> pointsR = generate_side_points(topR, botR);
+  const CPP_Point3 topL = tri.direction == tri::pointing::UP ? tri.A : tri.B;
+  const CPP_Point3 botL = tri.direction == tri::pointing::UP ? tri.C : tri.A;
+  const CPP_Point3 topR = tri.direction == tri::pointing::UP ? tri.A : tri.C;
+  const CPP_Point3 botR = tri.direction == tri::pointing::UP ? tri.B : tri.A;
+  const std::vector<CPP_Point3> pointsL = generate_side_points(topL, botL);
+  const std::vector<CPP_Point3> pointsR = generate_side_points(topR, botR);
 
   return {.pointsL = pointsL, .pointsR = pointsR, .lower_indx = lower};
 }
 
-std::vector<Point3> Point3::all_row_points_gnomonic(const Point3 &left,
-                                                    const Point3 &right,
-                                                    int num_divisions) {
+std::vector<CPP_Point3> CPP_Point3::all_row_points_gnomonic(
+    const CPP_Point3 &left, const CPP_Point3 &right, int num_divisions) {
   if (num_divisions <= 0) {
-    return std::vector<Point3>({left});
+    return std::vector<CPP_Point3>({left});
   }
-  std::vector<Point3> points;
+  std::vector<CPP_Point3> points;
   const long double dist_unit = left.distance(right) / num_divisions;
 
-  Point3 uLR = right;
+  CPP_Point3 uLR = right;
   uLR.subtract(left);
   uLR.unit();
   // add first point
@@ -427,7 +427,7 @@ std::vector<Point3> Point3::all_row_points_gnomonic(const Point3 &left,
   for (int c = 1; c < num_divisions; c++) {
     d = dist_unit * c;
     // rotated.reset(&uLR);
-    Point3 rotated = uLR;
+    CPP_Point3 rotated = uLR;
     rotated.mult_by(d);
     rotated.add(left);
     // rotated.spheriphy();
@@ -438,13 +438,12 @@ std::vector<Point3> Point3::all_row_points_gnomonic(const Point3 &left,
   return points;
 }
 
-Point3::lazy_row_points_result
-Point3::lazy_row_points_gnomonic(const int center, const Point3 &left,
-                                 const Point3 &right, int num_divisions,
-                                 const int lazy_range, int lower, int upper) {
+CPP_Point3::lazy_row_points_result CPP_Point3::lazy_row_points_gnomonic(
+    const int center, const CPP_Point3 &left, const CPP_Point3 &right,
+    int num_divisions, const int lazy_range, int lower, int upper) {
 
   if (num_divisions <= 0) {
-    return {.row_points = std::vector<Point3>({left}), .lower_indx = 0};
+    return {.row_points = std::vector<CPP_Point3>({left}), .lower_indx = 0};
   }
   if (lower == -1) {
     lower = center - lazy_range;
@@ -460,10 +459,10 @@ Point3::lazy_row_points_gnomonic(const int center, const Point3 &left,
     upper = num_divisions;
   }
 
-  std::vector<Point3> point_arr;
+  std::vector<CPP_Point3> point_arr;
   const long double dist = left.distance(right);
   const long double dist_unit = dist / num_divisions;
-  Point3 uLR = right;
+  CPP_Point3 uLR = right;
   uLR.subtract(left);
   uLR.unit();
   // add points in lazy range
@@ -472,7 +471,7 @@ Point3::lazy_row_points_gnomonic(const int center, const Point3 &left,
   for (int c = lower; c <= upper; c++) {
     d = dist_unit * c;
     // rotated.reset(&uLR);
-    Point3 rotated = uLR;
+    CPP_Point3 rotated = uLR;
     rotated.mult_by(d);
     rotated.add(left);
     // rotated.spheriphy();
@@ -486,14 +485,14 @@ Point3::lazy_row_points_gnomonic(const int center, const Point3 &left,
  * QUATERNION POINT GENERATION
  **/
 
-std::vector<Point3> Point3::all_side_points_quaternion(const Point3 &above,
-                                                       const Point3 &below,
-                                                       int res) {
+std::vector<CPP_Point3>
+CPP_Point3::all_side_points_quaternion(const CPP_Point3 &above,
+                                       const CPP_Point3 &below, int res) {
   const long double nd = hexmapf::num_divisions(res);
-  std::vector<Point3> point_arr;
+  std::vector<CPP_Point3> point_arr;
   const long double angle = above.angle_between(below);
   const long double angle_unit = angle / nd;
-  Point3 axis = above;
+  CPP_Point3 axis = above;
   axis.cross(below);
   // add first point
   point_arr.push_back(above);
@@ -502,8 +501,8 @@ std::vector<Point3> Point3::all_side_points_quaternion(const Point3 &above,
   // std::unique_ptr<Point3> rotated;
   for (int c = 1; c < nd; c++) {
     ang = angle_unit * c;
-    // Point3 above_copy = above;
-    Point3 rotated = above;
+    // CPP_Point3 above_copy = above;
+    CPP_Point3 rotated = above;
     rotated.rotate(axis, ang);
     point_arr.push_back(rotated);
   }
@@ -512,10 +511,10 @@ std::vector<Point3> Point3::all_side_points_quaternion(const Point3 &above,
   return point_arr;
 };
 
-Point3::lazy_side_points_result
-Point3::lazy_side_points_quaternion(const Triangle &tri, const int center,
-                                    const int res, const int lazy_range,
-                                    int lower, int upper) {
+CPP_Point3::lazy_side_points_result
+CPP_Point3::lazy_side_points_quaternion(const Triangle &tri, const int center,
+                                        const int res, const int lazy_range,
+                                        int lower, int upper) {
   const int nd = hexmapf::num_divisions(res);
   if (lower == -1) {
     lower = center - lazy_range;
@@ -533,51 +532,50 @@ Point3::lazy_side_points_quaternion(const Triangle &tri, const int center,
 
   // generate list of points
   const std::function generate_side_points =
-      [&nd, &lower, &upper](const Point3 top,
-                            const Point3 bot) -> std::vector<Point3> {
-    std::vector<Point3> arr;
+      [&nd, &lower, &upper](const CPP_Point3 top,
+                            const CPP_Point3 bot) -> std::vector<CPP_Point3> {
+    std::vector<CPP_Point3> arr;
     const long double angle = top.angle_between(bot);
     const long double angle_unit = angle / nd;
-    Point3 axis = top;
+    CPP_Point3 axis = top;
     axis.cross(bot);
     long double ang;
     // std::unique_ptr<Point3> rotated;
     for (int c = lower; c <= upper; c++) {
       ang = angle_unit * c;
-      Point3 rotated = top;
+      CPP_Point3 rotated = top;
       rotated.rotate(axis, ang);
       arr.push_back(rotated);
     }
     return arr;
   };
   // setup points
-  const Point3 topL = tri.direction == tri::pointing::UP ? tri.A : tri.B;
-  const Point3 botL = tri.direction == tri::pointing::UP ? tri.C : tri.A;
-  const Point3 topR = tri.direction == tri::pointing::UP ? tri.A : tri.C;
-  const Point3 botR = tri.direction == tri::pointing::UP ? tri.B : tri.A;
+  const CPP_Point3 topL = tri.direction == tri::pointing::UP ? tri.A : tri.B;
+  const CPP_Point3 botL = tri.direction == tri::pointing::UP ? tri.C : tri.A;
+  const CPP_Point3 topR = tri.direction == tri::pointing::UP ? tri.A : tri.C;
+  const CPP_Point3 botR = tri.direction == tri::pointing::UP ? tri.B : tri.A;
   // generate side points
-  const std::vector<Point3> pointsL = generate_side_points(topL, botL);
-  const std::vector<Point3> pointsR = generate_side_points(topR, botR);
+  const std::vector<CPP_Point3> pointsL = generate_side_points(topL, botL);
+  const std::vector<CPP_Point3> pointsR = generate_side_points(topR, botR);
 
   return {.pointsL = pointsL, .pointsR = pointsR, .lower_indx = lower};
 }
 
-std::vector<Point3> Point3::all_row_points_quaternion(const Point3 &left,
-                                                      const Point3 &right,
-                                                      int num_divisions) {
+std::vector<CPP_Point3> CPP_Point3::all_row_points_quaternion(
+    const CPP_Point3 &left, const CPP_Point3 &right, int num_divisions) {
   if (num_divisions <= 0) {
-    return std::vector<Point3>({left});
+    return std::vector<CPP_Point3>({left});
   }
-  std::vector<Point3> point_arr;
+  std::vector<CPP_Point3> point_arr;
   const long double angle = left.angle_between(right);
   const long double angle_unit = angle / num_divisions;
-  Point3 axis = left;
+  CPP_Point3 axis = left;
   axis.cross(right);
   // add first point
   point_arr.push_back(left);
   // add points between
   long double ang;
-  Point3 *rotated = nullptr;
+  CPP_Point3 *rotated = nullptr;
   for (int c = 1; c < num_divisions; c++) {
     ang = angle_unit * c;
     *rotated = left;
@@ -590,12 +588,11 @@ std::vector<Point3> Point3::all_row_points_quaternion(const Point3 &left,
   return point_arr;
 }
 
-Point3::lazy_row_points_result
-Point3::lazy_row_points_quaternion(const int center, const Point3 &left,
-                                   const Point3 &right, int num_divisions,
-                                   const int lazy_range, int lower, int upper) {
+CPP_Point3::lazy_row_points_result CPP_Point3::lazy_row_points_quaternion(
+    const int center, const CPP_Point3 &left, const CPP_Point3 &right,
+    int num_divisions, const int lazy_range, int lower, int upper) {
   if (num_divisions <= 0) {
-    return {.row_points = std::vector<Point3>({left}), .lower_indx = 0};
+    return {.row_points = std::vector<CPP_Point3>({left}), .lower_indx = 0};
   }
 
   if (lower == -1) {
@@ -612,17 +609,17 @@ Point3::lazy_row_points_quaternion(const int center, const Point3 &left,
     upper = num_divisions;
   }
 
-  std::vector<Point3> point_arr;
+  std::vector<CPP_Point3> point_arr;
   const long double angle = left.angle_between(right);
   const long double angle_unit = angle / num_divisions;
-  Point3 axis = left;
+  CPP_Point3 axis = left;
   axis.cross(right);
   // add points in lazy range
   long double ang;
   // std::unique_ptr<Point3> rotated;
   for (int c = lower; c <= upper; c++) {
     ang = angle_unit * c;
-    Point3 rotated = left;
+    CPP_Point3 rotated = left;
     rotated.rotate(left, ang);
     point_arr.push_back(rotated);
   }

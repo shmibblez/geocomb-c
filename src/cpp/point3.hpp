@@ -10,9 +10,9 @@
 #include <vector>
 
 class Triangle;
-class GPoint3;
+class CPP_GPoint3;
 
-class Point3 {
+class CPP_Point3 {
 
 public:
   // point's x coordinate
@@ -26,18 +26,18 @@ public:
   // whether point is phex center (and politically correct)
   bool is_pc;
   // point long double
-  Point3(long double x, long double y, long double z, bool is_pc = false,
-         int tri_num = -1);
-  ~Point3();
+  CPP_Point3(long double x, long double y, long double z, bool is_pc = false,
+             int tri_num = -1);
+  ~CPP_Point3();
 
   struct lazy_side_points_result {
-    std::vector<Point3> pointsL;
-    std::vector<Point3> pointsR;
+    std::vector<CPP_Point3> pointsL;
+    std::vector<CPP_Point3> pointsR;
     int lower_indx;
   };
 
   struct lazy_row_points_result {
-    std::vector<Point3> row_points;
+    std::vector<CPP_Point3> row_points;
     int lower_indx;
   };
 
@@ -61,30 +61,30 @@ public:
 
   /**
    * angle between vectors (origin, this) and (origin, p) */
-  long double angle_between(const Point3 &p) const;
+  long double angle_between(const CPP_Point3 &p) const;
   /**
    * @param around vec to rotate around -> vec is from origin to point
    * @param rad rads to rotate
    * @note modifies obj */
-  void rotate(const Point3 &around, const long double &rad);
+  void rotate(const CPP_Point3 &around, const long double &rad);
   /**
    * magnitude from origin to point */
   long double mag() const;
   /**
    * add another vector
    * !-> modifies obj */
-  void add(const Point3 &p);
+  void add(const CPP_Point3 &p);
   /**
    * subtract another vector
    * !-> modifies obj */
-  void subtract(const Point3 &p);
+  void subtract(const CPP_Point3 &p);
   /**
    * dot product */
-  long double dot(const Point3 &p) const;
+  long double dot(const CPP_Point3 &p) const;
   /**
    * cross product
    * !-> modifies obj */
-  void cross(const Point3 &p);
+  void cross(const CPP_Point3 &p);
   /**
    * convert into unit vec
    * !-> modifies obj */
@@ -99,7 +99,7 @@ public:
   void div_by(const long double num);
   /**
    * distance between vectors */
-  long double distance(const Point3 &p) const;
+  long double distance(const CPP_Point3 &p) const;
   /**
    * move point to be on sphere (multiply unit vec by radius) */
   void spheriphy();
@@ -107,16 +107,17 @@ public:
    * check if points on opposite sides of globe
    * !-> loosely determined -> points don't need to be 180 deg apart, in some
    * cases points 90 deg apart will return true */
-  bool on_opposite_side(const Point3 &p) const;
+  bool on_opposite_side(const CPP_Point3 &p) const;
   /**
    * check if point is valid (all coords finite & valid numbers) */
   bool is_valid() const;
   /**
    * @returns copy of closest point in point arr */
-  GPoint3 closest_point(std::vector<GPoint3> &points) const;
+  CPP_GPoint3 closest_point(std::vector<CPP_GPoint3> &points) const;
   /**
    * @returns copy of closest point in 2d point arr */
-  GPoint3 closest_point_2d(std::vector<std::vector<GPoint3>> &points_2d) const;
+  CPP_GPoint3
+  closest_point_2d(std::vector<std::vector<CPP_GPoint3>> &points_2d) const;
 
   /**
    * HEXMAP STUFF, THIS IS WHERE IT GETS INTERESTING
@@ -139,8 +140,9 @@ public:
    * @param res resolution
    * @returns vector (array) of points between above and below (inclusive),
    * above is first point, below is last */
-  static std::vector<Point3>
-  all_side_points_gnomonic(const Point3 &above, const Point3 &below, int res);
+  static std::vector<CPP_Point3>
+  all_side_points_gnomonic(const CPP_Point3 &above, const CPP_Point3 &below,
+                           int res);
   /**
    * generates only necessary points along right and left triangle sides
    * (NOTE: points returned are along line between triangle sides, need to be
@@ -175,9 +177,9 @@ public:
    * @returns list of points between left and right points inclusive, if
    * num_divisions is 0, it means at triangle tip and returns list with 1 point
    */
-  static std::vector<Point3> all_row_points_gnomonic(const Point3 &left,
-                                                     const Point3 &right,
-                                                     int num_divisions);
+  static std::vector<CPP_Point3>
+  all_row_points_gnomonic(const CPP_Point3 &left, const CPP_Point3 &right,
+                          int num_divisions);
   /**
    * generates only necessary points between [left] and [right] points
    * (NOTE: points returned are along line between triangle sides, need to be
@@ -195,8 +197,8 @@ public:
    * point)
    * - (int) lower bound offset is first generated point # from left to right */
   static lazy_row_points_result
-  lazy_row_points_gnomonic(const int center, const Point3 &left,
-                           const Point3 &right, int num_divisions,
+  lazy_row_points_gnomonic(const int center, const CPP_Point3 &left,
+                           const CPP_Point3 &right, int num_divisions,
                            const int lazy_range = constants::lazy_range,
                            int lower = -1, int upper = -1);
 
@@ -211,8 +213,9 @@ public:
    * @param res resolution
    * @returns vector (array) of points between above and below (inclusive),
    * above is first point, below is last */
-  static std::vector<Point3>
-  all_side_points_quaternion(const Point3 &above, const Point3 &below, int res);
+  static std::vector<CPP_Point3>
+  all_side_points_quaternion(const CPP_Point3 &above, const CPP_Point3 &below,
+                             int res);
   /**
    * generates only necessary points along right and left triangle sides
    * @param tri triangle (for referencing points)
@@ -243,9 +246,9 @@ public:
    * @returns list of points between left and right points inclusive, if
    * num_divisions is 0, it means at triangle tip and returns list with 1 point
    */
-  static std::vector<Point3> all_row_points_quaternion(const Point3 &left,
-                                                       const Point3 &right,
-                                                       int num_divisions);
+  static std::vector<CPP_Point3>
+  all_row_points_quaternion(const CPP_Point3 &left, const CPP_Point3 &right,
+                            int num_divisions);
   /**
    * generates only necessary points between [left] and [right] points
    * @param center point # from left to right to generate points around
@@ -261,8 +264,8 @@ public:
    * point)
    * - (int) lower bound offset is first generated point # from left to right */
   static lazy_row_points_result
-  lazy_row_points_quaternion(const int center, const Point3 &left,
-                             const Point3 &right, int num_divisions,
+  lazy_row_points_quaternion(const int center, const CPP_Point3 &left,
+                             const CPP_Point3 &right, int num_divisions,
                              const int lazy_range = constants::lazy_range,
                              int lower = -1, int upper = -1);
 
@@ -271,7 +274,7 @@ public:
    * @param points points to spheriphy
    * @returns copy of array containing spherified points
    **/
-  static std::vector<Point3> spherify1D(std::vector<Point3> points);
+  static std::vector<CPP_Point3> spherify1D(std::vector<CPP_Point3> points);
 
   /**
    * NOT IMPLEMENED (list of functions that haven't been implemented yet & are
@@ -281,7 +284,7 @@ public:
    */
 };
 
-class GPoint3 : public Point3 {
+class CPP_GPoint3 : public CPP_Point3 {
 
 public:
   int res;
@@ -289,14 +292,14 @@ public:
   int col;
   ico::map_orientation mo;
   ico::rotation_method rm;
-  GPoint3(long double x, long double y, long double z, int res, int row,
-          int col, ico::map_orientation mo, ico::rotation_method rm,
-          bool is_pc = false, int tri_num = -1);
+  CPP_GPoint3(long double x, long double y, long double z, int res, int row,
+              int col, ico::map_orientation mo, ico::rotation_method rm,
+              bool is_pc = false, int tri_num = -1);
 
   /**
    * default, creates invalid point
    **/
-  GPoint3();
+  CPP_GPoint3();
 
   /**
    * checks if point is phex center
@@ -311,10 +314,10 @@ public:
    * generate point from coordinates
    * @param lat latitude in degrees
    * @param lon longitude in degrees */
-  static GPoint3 from_coordinates(long double lat, long double lon);
+  static CPP_GPoint3 from_coordinates(long double lat, long double lon);
 };
 
-class Quaternion : public Point3 {
+class Quaternion : public CPP_Point3 {
 
 public:
   long double w;

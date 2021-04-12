@@ -1,28 +1,28 @@
 #include "phex.hpp"
 
-Phex::Phex(std::vector<GPoint3> points, GPoint3 center)
+Phex::Phex(std::vector<CPP_GPoint3> points, CPP_GPoint3 center)
     : points(points), center(center){};
 
 Phex::~Phex() {}
 
 std::vector<Phex>
-Phex::all_phexes(Icosahedron::all_icosahedron_points all_points) {
+Phex::all_phexes(CPP_Icosahedron::all_icosahedron_points all_points) {
   // generate all points
-  const std::vector<GPoint3> centers = Phex::all_phex_centers(all_points);
+  const std::vector<CPP_GPoint3> centers = Phex::all_phex_centers(all_points);
   // init phexes
   std::vector<Phex> phexes;
   // generate phexes from all points & phex centers
-  for (const GPoint3 &c : centers) {
+  for (const CPP_GPoint3 &c : centers) {
     // first hex center index is -> row_num % 3
     phexes.push_back(Phex(Phex::not_lazy_surrounding_points(all_points, c), c));
   }
   return phexes;
 };
 
-std::vector<GPoint3>
-Phex::all_phex_centers(Icosahedron::all_icosahedron_points all_points) {
+std::vector<CPP_GPoint3>
+Phex::all_phex_centers(CPP_Icosahedron::all_icosahedron_points all_points) {
   const int tri_div_count = (all_points.size() - 1) / 3;
-  std::vector<GPoint3> centers;
+  std::vector<CPP_GPoint3> centers;
 
   for (unsigned int fl = 0; fl < all_points.size(); fl++) {
     // first hex center index is -> row_num % 3
@@ -73,8 +73,8 @@ Phex::all_phex_centers(Icosahedron::all_icosahedron_points all_points) {
 // TODO: for lazy version, just generate points from row & col
 // will also need res, & make sure p would be valid for res (within row & col
 // bounds)
-std::vector<GPoint3> Phex::not_lazy_surrounding_points(
-    Icosahedron::all_icosahedron_points all_points, GPoint3 p) {
+std::vector<CPP_GPoint3> Phex::not_lazy_surrounding_points(
+    CPP_Icosahedron::all_icosahedron_points all_points, CPP_GPoint3 p) {
   if (p.is_pc) {
     // north, return row
     if (p.row == 0) {
@@ -95,7 +95,7 @@ std::vector<GPoint3> Phex::not_lazy_surrounding_points(
 
   const int tri_div = p.res * 3;
   // replace with diy pointer if doesn't work
-  std::unique_ptr<GPoint3> l_cent, l_abov, r_abov, r_cent, r_belo, l_belo;
+  std::unique_ptr<CPP_GPoint3> l_cent, l_abov, r_abov, r_cent, r_belo, l_belo;
 
   if (p.row < tri_div) {
     // top pent phexes

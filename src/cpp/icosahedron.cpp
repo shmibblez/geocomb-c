@@ -10,15 +10,15 @@ using std::cos;
 using std::sin;
 using std::trunc;
 
-Icosahedron::Icosahedron(ico::map_orientation orientation,
-                         ico::rotation_method rotation)
-    : tris(Icosahedron::triangles()), mo(orientation), rm(rotation) {}
+CPP_Icosahedron::CPP_Icosahedron(ico::map_orientation orientation,
+                                 ico::rotation_method rotation)
+    : tris(CPP_Icosahedron::triangles()), mo(orientation), rm(rotation) {}
 
-std::string Icosahedron::map_orientation_key(ico::map_orientation mo) {
+std::string CPP_Icosahedron::map_orientation_key(ico::map_orientation mo) {
   return std::vector<std::string>({"e", "d"})[mo];
 }
 
-std::string Icosahedron::rotation_method_key(ico::rotation_method rm) {
+std::string CPP_Icosahedron::rotation_method_key(ico::rotation_method rm) {
   return std::vector<std::string>({"g", "q"})[rm];
 }
 
@@ -26,7 +26,7 @@ std::string Icosahedron::rotation_method_key(ico::rotation_method rm) {
  * generates icosahedron triangles
  * @returns vector of icosahedron triangles
  */
-std::vector<Triangle> Icosahedron::triangles() {
+std::vector<Triangle> CPP_Icosahedron::triangles() {
   const long double gr = constants::golden_ratio;
   const long double r = constants::radius;
   const long double factor = r / sqrt(gr * gr + 1.0);
@@ -49,31 +49,31 @@ std::vector<Triangle> Icosahedron::triangles() {
    *           *       *       *       *       *          share south point
    */
 
-  Point3 north(_1, 0.0, _gr, true);
+  CPP_Point3 north(_1, 0.0, _gr, true);
   north.rotate_around_y(rads);
-  Point3 top1(_gr, -_1, 0.0, true);
+  CPP_Point3 top1(_gr, -_1, 0.0, true);
   top1.rotate_around_y(rads);
-  Point3 top2(_gr, _1, 0.0, true);
+  CPP_Point3 top2(_gr, _1, 0.0, true);
   top2.rotate_around_y(rads);
-  Point3 top3(0, _gr, _1, true);
+  CPP_Point3 top3(0, _gr, _1, true);
   top3.rotate_around_y(rads);
-  Point3 top4(-_1, 0.0, _gr, true);
+  CPP_Point3 top4(-_1, 0.0, _gr, true);
   top4.rotate_around_y(rads);
-  Point3 top5(0, -_gr, _1, true);
+  CPP_Point3 top5(0, -_gr, _1, true);
   top5.rotate_around_y(rads);
 
-  Point3 bot1(_1, 0.0, -_gr, true);
+  CPP_Point3 bot1(_1, 0.0, -_gr, true);
   bot1.rotate_around_y(rads);
-  Point3 bot2(0, _gr, -_1, true);
+  CPP_Point3 bot2(0, _gr, -_1, true);
   bot2.rotate_around_y(rads);
-  Point3 bot3(-_gr, _1, 0.0, true);
+  CPP_Point3 bot3(-_gr, _1, 0.0, true);
   bot3.rotate_around_y(rads);
-  Point3 bot4(-_gr, -_1, 0.0, true);
+  CPP_Point3 bot4(-_gr, -_1, 0.0, true);
   bot4.rotate_around_y(rads);
-  Point3 bot5(0, -_gr, -_1, true);
+  CPP_Point3 bot5(0, -_gr, -_1, true);
   bot5.rotate_around_y(rads);
 
-  Point3 south(-_1, 0.0, -_gr, true);
+  CPP_Point3 south(-_1, 0.0, -_gr, true);
   south.rotate_around_y(rads);
 
   /**
@@ -168,7 +168,7 @@ std::vector<Triangle> Icosahedron::triangles() {
  * @param indx index of triangle to generate
  * @returns icosahedron triangle at [indx]
  **/
-Triangle Icosahedron::triangle(const int indx) {
+Triangle CPP_Icosahedron::triangle(const int indx) {
   // TODO: how to optimize? (only create necessary tri)
   // proposal: have static class that creates specific triangles (function for
   // each triangle), but then, how to call a function? maybe then store array of
@@ -178,10 +178,11 @@ Triangle Icosahedron::triangle(const int indx) {
                                 "range [0, 19], provided indx: " +
                                 std::to_string(indx));
   }
-  return Icosahedron::triangles()[indx];
+  return CPP_Icosahedron::triangles()[indx];
 }
 
-Point3 Icosahedron::point_from_coords(long double lat, long double lon) const {
+CPP_Point3 CPP_Icosahedron::point_from_coords(long double lat,
+                                              long double lon) const {
   if (!(lat <= 90 && lat >= -90)) {
     throw std::invalid_argument("lat must be between -90 and 90");
   }
@@ -194,17 +195,17 @@ Point3 Icosahedron::point_from_coords(long double lat, long double lon) const {
   const long double x = r * cos(lat) * cos(lon);
   const long double y = r * cos(lat) * sin(lon);
   const long double z = r * sin(lat);
-  return Point3(x, y, z);
+  return CPP_Point3(x, y, z);
 }
 
-Icosahedron::hash_properties Icosahedron::hash(Point3 p, int res) {
-  Icosahedron::all_icosahedron_points lazy_points =
+CPP_Icosahedron::hash_properties CPP_Icosahedron::hash(CPP_Point3 p, int res) {
+  CPP_Icosahedron::all_icosahedron_points lazy_points =
       this->lazy_points_around(p, res);
 
   // closest point that is also phex center
-  GPoint3 cp = p.closest_point_2d(lazy_points);
+  CPP_GPoint3 cp = p.closest_point_2d(lazy_points);
 
-  return Icosahedron::hash_properties{
+  return CPP_Icosahedron::hash_properties{
       .res = res,
       .row = cp.row,
       .col = cp.col,
@@ -213,8 +214,8 @@ Icosahedron::hash_properties Icosahedron::hash(Point3 p, int res) {
   };
 }
 
-std::vector<std::vector<GPoint3>>
-Icosahedron::lazy_points_around(Point3 p, int res) const {
+std::vector<std::vector<CPP_GPoint3>>
+CPP_Icosahedron::lazy_points_around(CPP_Point3 p, int res) const {
   const Triangle tri = this->containing_triangle(p);
   const int nd = hexmapf::num_divisions(res);
   // points and lazy range start indexes in relation to tri.C
@@ -224,7 +225,7 @@ Icosahedron::lazy_points_around(Point3 p, int res) const {
   const int lower_vert = tri_points_around.start_vert;
   const int lower_horz = tri_points_around.start_horz;
 
-  const std::vector<std::vector<Point3>> points = tri_points_around.points;
+  const std::vector<std::vector<CPP_Point3>> points = tri_points_around.points;
 
   // TODO: move indexing functions to static function class instead of creating
   // lambdas every time below
@@ -232,22 +233,22 @@ Icosahedron::lazy_points_around(Point3 p, int res) const {
   // index top
   const std::function index_top =
       [&lower_vert, &lower_horz, *this, &tri, &points,
-       &res]() -> std::vector<std::vector<GPoint3>> {
+       &res]() -> std::vector<std::vector<CPP_GPoint3>> {
     // TODO: test if works, point numbering and pushing to vecs
-    std::vector<std::vector<GPoint3>> indexed_points;
+    std::vector<std::vector<CPP_GPoint3>> indexed_points;
     const int row_off = lower_vert;
     for (unsigned int r = 0; r < points.size() && points[0].size() > 0; r++) {
       const int row = row_off + r;
-      indexed_points.push_back(std::vector<GPoint3>());
+      indexed_points.push_back(std::vector<CPP_GPoint3>());
       for (unsigned int c = 0; c < points[r].size(); c++) {
         int col = (lower_vert + r) * tri.num + lower_horz + c;
         if (col == row * 5) {
           col = 0;
         }
-        const Point3 p3 = points[r][c];
-        const GPoint3 new_point(p3.x, p3.y, p3.z, res, row, col, this->mo,
-                                this->rm,
-                                GPoint3::is_phex_center(res, row, col));
+        const CPP_Point3 p3 = points[r][c];
+        const CPP_GPoint3 new_point(p3.x, p3.y, p3.z, res, row, col, this->mo,
+                                    this->rm,
+                                    CPP_GPoint3::is_phex_center(res, row, col));
         indexed_points[r].push_back(new_point);
       }
     }
@@ -256,49 +257,49 @@ Icosahedron::lazy_points_around(Point3 p, int res) const {
   // index center up
   const std::function index_cen_up =
       [&nd, &lower_vert, &lower_horz, *this, &points, &res,
-       &tri]() -> std::vector<std::vector<GPoint3>> {
-    std::vector<std::vector<GPoint3>> indexed_points;
+       &tri]() -> std::vector<std::vector<CPP_GPoint3>> {
+    std::vector<std::vector<CPP_GPoint3>> indexed_points;
     const int num_tris_before = hexmapf::closest_even_num(tri.num - 5);
     const int row_off = nd + lower_vert;
     const int col_off =
         nd * (num_tris_before / 2) + (nd - lower_vert) + lower_horz;
     for (unsigned int r = 0; r < points.size() && points[r].size() > 0; r++) {
       const int row = row_off + r;
-      indexed_points.push_back(std::vector<GPoint3>());
+      indexed_points.push_back(std::vector<CPP_GPoint3>());
       for (unsigned int c = 0; c < points[r].size(); c++) {
         int col = col_off + c - r;
         if (col == nd * 5) {
           col = 0;
         }
-        const Point3 p3 = points[r][c];
-        const GPoint3 new_point(p3.x, p3.y, p3.z, res, row, col, this->mo,
-                                this->rm,
-                                GPoint3::is_phex_center(res, row, col));
+        const CPP_Point3 p3 = points[r][c];
+        const CPP_GPoint3 new_point(p3.x, p3.y, p3.z, res, row, col, this->mo,
+                                    this->rm,
+                                    CPP_GPoint3::is_phex_center(res, row, col));
         indexed_points[r].push_back(new_point);
       }
     }
     return indexed_points;
   };
   // index center down
-  std::function index_cen_dn = [&nd, &lower_vert, &lower_horz, &res, *this,
-                                &points,
-                                &tri]() -> std::vector<std::vector<GPoint3>> {
-    std::vector<std::vector<GPoint3>> indexed_points;
+  std::function index_cen_dn =
+      [&nd, &lower_vert, &lower_horz, &res, *this, &points,
+       &tri]() -> std::vector<std::vector<CPP_GPoint3>> {
+    std::vector<std::vector<CPP_GPoint3>> indexed_points;
     const int num_tris_before = hexmapf::closest_even_num(tri.num - 5);
     const int row_off = nd + lower_vert;
     const int col_off = nd * (num_tris_before / 2);
     for (unsigned int r = 0; r < points.size() && points[r].size() > 0; r++) {
       const int row = row_off + r;
-      indexed_points.push_back(std::vector<GPoint3>());
+      indexed_points.push_back(std::vector<CPP_GPoint3>());
       for (unsigned int c = 0; c < points[r].size(); c++) {
         int col = col_off + nd * 2 - row - lower_horz - c;
         if (col == nd * 5) {
           col = 0;
         }
-        const Point3 p3 = points[r][c];
-        const GPoint3 new_point(p3.x, p3.y, p3.z, res, row, col, this->mo,
-                                this->rm,
-                                GPoint3::is_phex_center(res, row, col));
+        const CPP_Point3 p3 = points[r][c];
+        const CPP_GPoint3 new_point(p3.x, p3.y, p3.z, res, row, col, this->mo,
+                                    this->rm,
+                                    CPP_GPoint3::is_phex_center(res, row, col));
         indexed_points[r].push_back(new_point);
       }
     }
@@ -307,21 +308,21 @@ Icosahedron::lazy_points_around(Point3 p, int res) const {
   // index bot
   std::function index_bot = [&nd, &lower_horz, &lower_vert, &res, *this,
                              &points,
-                             &tri]() -> std::vector<std::vector<GPoint3>> {
-    std::vector<std::vector<GPoint3>> indexed_points;
+                             &tri]() -> std::vector<std::vector<CPP_GPoint3>> {
+    std::vector<std::vector<CPP_GPoint3>> indexed_points;
     const int row_off = nd * 2 + lower_vert;
     for (unsigned int r = 0; r < points.size() && points[r].size() > 0; r++) {
       const int row = row_off + r;
-      indexed_points.push_back(std::vector<GPoint3>());
+      indexed_points.push_back(std::vector<CPP_GPoint3>());
       for (unsigned int c = 0; c < points[r].size(); c++) {
         int col = (nd - lower_vert - r) * (tri.num - 15 + 1) - lower_horz - c;
         if (col == (nd * 3 - row) * 5) {
           col = 0;
         }
-        const Point3 p3 = points[r][c];
-        const GPoint3 new_point(p3.x, p3.y, p3.z, res, row, col, this->mo,
-                                this->rm,
-                                GPoint3::is_phex_center(res, row, col));
+        const CPP_Point3 p3 = points[r][c];
+        const CPP_GPoint3 new_point(p3.x, p3.y, p3.z, res, row, col, this->mo,
+                                    this->rm,
+                                    CPP_GPoint3::is_phex_center(res, row, col));
         indexed_points[r].push_back(new_point);
       }
     }
@@ -329,7 +330,7 @@ Icosahedron::lazy_points_around(Point3 p, int res) const {
   };
 
   // no more functions, now determine which one to use
-  std::vector<std::vector<GPoint3>> lazy_points;
+  std::vector<std::vector<CPP_GPoint3>> lazy_points;
   switch (tri.pos) {
   case tri::position::TOP: {
     lazy_points = index_top();
@@ -346,7 +347,8 @@ Icosahedron::lazy_points_around(Point3 p, int res) const {
   }
   case tri::position::NA: {
     throw std::logic_error(
-        "Icosahedron::lazy_points_around failed -> tri from icosahedron->tris "
+        "CPP_Icosahedron::lazy_points_around failed -> tri from "
+        "icosahedron->tris "
         "didn't have pos for some reason, this should never happen");
   }
   }
@@ -354,7 +356,7 @@ Icosahedron::lazy_points_around(Point3 p, int res) const {
   return lazy_points;
 }
 
-Triangle Icosahedron::containing_triangle(Point3 p) const {
+Triangle CPP_Icosahedron::containing_triangle(CPP_Point3 p) const {
   for (const Triangle &t : this->tris) {
     if (t.contains_point(p)) {
 
@@ -362,13 +364,15 @@ Triangle Icosahedron::containing_triangle(Point3 p) const {
     }
   }
   throw std::logic_error(
-      "Icosahedron::containing_triangle failed to find containing triangle. "
+      "CPP_Icosahedron::containing_triangle failed to find containing "
+      "triangle. "
       "This is likely due to a rounding error. Point coords -> x: " +
       std::to_string(p.x) + ", y: " + std::to_string(p.y) +
       ", z: " + std::to_string(p.z));
 }
 
-GPoint3 Icosahedron::parse_hash(Icosahedron::hash_properties hash) const {
+CPP_GPoint3
+CPP_Icosahedron::parse_hash(CPP_Icosahedron::hash_properties hash) const {
   if (hash.res <= 0) {
     throw std::invalid_argument("invalid hash -> resolution must be "
                                 "greater than 0, provided res: " +
@@ -426,24 +430,25 @@ GPoint3 Icosahedron::parse_hash(Icosahedron::hash_properties hash) const {
     tri_num = 15 + tri_offs;
   }
 
-  const Triangle tri = Icosahedron::triangle(tri_num);
-  const Point3 p =
+  const Triangle tri = CPP_Icosahedron::triangle(tri_num);
+  const CPP_Point3 p =
       tri.generate_point(hash.res, lower_vert, lower_horz, hash.rm);
 
-  return GPoint3(p.x, p.y, p.z, hash.res, row, col, hash.mo, hash.rm,
-                 GPoint3::is_phex_center(hash.res, row, col), tri.num);
+  return CPP_GPoint3(p.x, p.y, p.z, hash.res, row, col, hash.mo, hash.rm,
+                     CPP_GPoint3::is_phex_center(hash.res, row, col), tri.num);
 }
 
 /**
  * TODO: need to test, have funny feeling won't work
  **/
-Icosahedron::all_icosahedron_points Icosahedron::all_points(int res) const {
-  Icosahedron::all_icosahedron_points points;
+CPP_Icosahedron::all_icosahedron_points
+CPP_Icosahedron::all_points(int res) const {
+  CPP_Icosahedron::all_icosahedron_points points;
   const int offset_amount = res * 3;
   for (const Triangle &t : this->tris) {
     int offset;
     int range;
-    std::vector<std::vector<Point3>> ps = t.all_points(res, this->rm);
+    std::vector<std::vector<CPP_Point3>> ps = t.all_points(res, this->rm);
     switch (t.pos) {
     case tri::position::TOP: {
       offset = 0;
@@ -462,7 +467,8 @@ Icosahedron::all_icosahedron_points Icosahedron::all_points(int res) const {
     }
     case tri::position::NA: {
       throw std::logic_error(
-          "Icosahedron::all_points failed -> tri from icosahedron->tris didn't "
+          "CPP_Icosahedron::all_points failed -> tri from icosahedron->tris "
+          "didn't "
           "have pos for some reason, this should never happen");
     }
     };
@@ -470,31 +476,31 @@ Icosahedron::all_icosahedron_points Icosahedron::all_points(int res) const {
       if ((signed)points.size() < offset + fl) {
         // since tris start from top to bottom, this shouldn't skip any indices
         // -> adding in order, should do the same as js version (original)
-        points.push_back(std::vector<GPoint3>());
+        points.push_back(std::vector<CPP_GPoint3>());
       }
-      Point3 popped = ps[fl].back();
+      CPP_Point3 popped = ps[fl].back();
       ps[fl].pop_back();
       for (unsigned int sl = 0; sl < ps[fl].size(); sl++) {
         // adds gpoint3, storing indexes (for referencing other points)
-        points[offset + fl].push_back(
-            GPoint3(ps[fl][sl].x, ps[fl][sl].y, ps[fl][sl].z, res, offset + fl,
-                    static_cast<int>(points[offset + fl].size()), this->mo,
-                    this->rm, ps[fl][sl].is_pc));
+        points[offset + fl].push_back(CPP_GPoint3(
+            ps[fl][sl].x, ps[fl][sl].y, ps[fl][sl].z, res, offset + fl,
+            static_cast<int>(points[offset + fl].size()), this->mo, this->rm,
+            ps[fl][sl].is_pc));
       }
     }
   }
   return points;
 }
 
-std::vector<Phex> Icosahedron::all_phexes(int res) {
+std::vector<Phex> CPP_Icosahedron::all_phexes(int res) {
 
-  Icosahedron::all_icosahedron_points all_points = this->all_points(res);
-  std::vector<GPoint3> centers = Phex::all_phex_centers(all_points);
+  CPP_Icosahedron::all_icosahedron_points all_points = this->all_points(res);
+  std::vector<CPP_GPoint3> centers = Phex::all_phex_centers(all_points);
 
   std::vector<Phex> phexes;
 
   // create phexes for each phex center point
-  for (GPoint3 c : centers) {
+  for (CPP_GPoint3 c : centers) {
     // first hex center index is -> row_num % 3
     phexes.push_back(Phex(Phex::not_lazy_surrounding_points(all_points, c), c));
   }
@@ -505,8 +511,9 @@ std::vector<Phex> Icosahedron::all_phexes(int res) {
 /**
  * TODO: need to test of course
  **/
-Phex Icosahedron::not_lazy_containing_phex(Point3 p, int res) const {
-  const Icosahedron::all_icosahedron_points all_points = this->all_points(res);
+Phex CPP_Icosahedron::not_lazy_containing_phex(CPP_Point3 p, int res) const {
+  const CPP_Icosahedron::all_icosahedron_points all_points =
+      this->all_points(res);
   const std::vector<Phex> phexes = Phex::all_phexes(all_points);
 
   std::unique_ptr<Phex> closest_phex;

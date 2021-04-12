@@ -5,20 +5,21 @@
 
 using std::round;
 
-Triangle::Triangle(Point3 A, Point3 B, Point3 C, tri::pointing direction,
-                   tri::position pos, int num, int toAB, int toBC, int toCA)
+Triangle::Triangle(CPP_Point3 A, CPP_Point3 B, CPP_Point3 C,
+                   tri::pointing direction, tri::position pos, int num,
+                   int toAB, int toBC, int toCA)
     : A(A), B(B), C(C), direction(direction), pos(pos), num(num), toAB(toAB),
       toBC(toBC), toCA(toCA){};
 
 Triangle::vec_side_components_result
-Triangle::vec_side_components(const Triangle &tri, const Point3 &i) {
-  Point3 u_CA = tri.A;
+Triangle::vec_side_components(const Triangle &tri, const CPP_Point3 &i) {
+  CPP_Point3 u_CA = tri.A;
   u_CA.subtract(tri.C);
   u_CA.unit();
-  Point3 u_CB = tri.B;
+  CPP_Point3 u_CB = tri.B;
   u_CB.subtract(tri.C);
   u_CB.unit();
-  Point3 CI = i;
+  CPP_Point3 CI = i;
   CI.subtract(tri.C);
 
   const long double beta = u_CA.angle_between(CI);
@@ -30,26 +31,26 @@ Triangle::vec_side_components(const Triangle &tri, const Point3 &i) {
   const long double mag_CB = (mag_CI * sin(beta)) / sin(phi);
   const long double mag_CA = (mag_CI * sin(alpha)) / sin(phi);
 
-  Point3 vec_CA = u_CA;
+  CPP_Point3 vec_CA = u_CA;
   vec_CA.mult_by(mag_CA);
-  Point3 vec_CB = u_CB;
+  CPP_Point3 vec_CB = u_CB;
   vec_CB.mult_by(mag_CB);
   return {.vec_CA = vec_CA, .vec_CB = vec_CB};
 }
 
 Triangle::calc_percent_result
-Triangle::calc_percent_gnomonic(const Point3 &p) const {
+Triangle::calc_percent_gnomonic(const CPP_Point3 &p) const {
   // int precision = std::numeric_limits<long double>::max_digits10;
 
   const long double r = constants::radius;
-  Point3 original_AB = this->B;
+  CPP_Point3 original_AB = this->B;
   original_AB.subtract(this->A);
 
-  Point3 c_AB = original_AB;
+  CPP_Point3 c_AB = original_AB;
   c_AB.div_by(2.0);
   c_AB.add(this->A);
 
-  Point3 cent = c_AB;
+  CPP_Point3 cent = c_AB;
   cent.subtract(this->C);
   cent.mult_by(2.0 / 3.0);
   cent.add(this->C);
@@ -59,17 +60,17 @@ Triangle::calc_percent_gnomonic(const Point3 &p) const {
   const long double alpha = this->C.angle_between(cent);
   const long double mag_cent = cent.mag();
   const long double mag_h = mag_cent / cos(alpha);
-  Point3 A = this->A;
+  CPP_Point3 A = this->A;
   A.unit();
   A.mult_by(mag_h);
-  Point3 B = this->B;
+  CPP_Point3 B = this->B;
   B.unit();
   B.mult_by(mag_h);
-  Point3 C = this->C;
+  CPP_Point3 C = this->C;
   C.unit();
   C.mult_by(mag_h);
   const Triangle projected_tri = Triangle(A, B, C);
-  const Point3 projected_p = projected_tri.plane_intersection(p);
+  const CPP_Point3 projected_p = projected_tri.plane_intersection(p);
 
   // std::cout << "\nmag_h: " << mag_h << "\nmag_cent: " << mag_cent
   //           << "\nalpha: " << alpha << "\ncos(alpha): " << cos(alpha) <<
@@ -80,7 +81,7 @@ Triangle::calc_percent_gnomonic(const Point3 &p) const {
 
   const long double mag_comp_CA = components.vec_CA.mag();
   const long double mag_comp_CB = components.vec_CB.mag();
-  Point3 mag_temp = B;
+  CPP_Point3 mag_temp = B;
   mag_temp.subtract(A);
   const long double mag = mag_temp.mag();
 
@@ -88,49 +89,50 @@ Triangle::calc_percent_gnomonic(const Point3 &p) const {
 }
 
 Triangle::calc_percent_result
-Triangle::calc_percent_quaternion(const Point3 &p) const {
+Triangle::calc_percent_quaternion(const CPP_Point3 &p) const {
   throw std::logic_error("CalcPercent->quaternion not ready yet");
   // so don't get warning
   return {.percent_CA = (p.x * 0) - 1, .percent_CB = -1};
 }
 
-std::vector<std::vector<Point3>>
+std::vector<std::vector<CPP_Point3>>
 Triangle::all_points(int res, ico::rotation_method rm) const {
   // empty 2d vec
-  std::vector<std::vector<Point3>> points;
+  std::vector<std::vector<CPP_Point3>> points;
 
   const int max_divisions = hexmapf::num_divisions(res);
-  const Point3 left_above = this->direction == tri::pointing::UP ? A : B;
-  const Point3 left_below = this->direction == tri::pointing::UP ? C : A;
-  std::vector<Point3> left_points =
+  const CPP_Point3 left_above = this->direction == tri::pointing::UP ? A : B;
+  const CPP_Point3 left_below = this->direction == tri::pointing::UP ? C : A;
+  std::vector<CPP_Point3> left_points =
       rm == ico::rotation_method::gnomonic
-          ? Point3::all_side_points_gnomonic(left_above, left_below, res)
-          : Point3::all_side_points_quaternion(left_above, left_below, res);
+          ? CPP_Point3::all_side_points_gnomonic(left_above, left_below, res)
+          : CPP_Point3::all_side_points_quaternion(left_above, left_below, res);
 
-  const Point3 right_above = this->direction == tri::pointing::UP ? A : C;
-  const Point3 right_below = this->direction == tri::pointing::UP ? B : A;
-  std::vector<Point3> right_points =
+  const CPP_Point3 right_above = this->direction == tri::pointing::UP ? A : C;
+  const CPP_Point3 right_below = this->direction == tri::pointing::UP ? B : A;
+  std::vector<CPP_Point3> right_points =
       rm == ico::rotation_method::gnomonic
-          ? Point3::all_side_points_gnomonic(right_above, right_below, res)
-          : Point3::all_side_points_quaternion(right_above, right_below, res);
+          ? CPP_Point3::all_side_points_gnomonic(right_above, right_below, res)
+          : CPP_Point3::all_side_points_quaternion(right_above, right_below,
+                                                   res);
 
   for (int x = 0; x <= max_divisions; x++) {
     int num_divs = this->direction == tri::pointing::UP ? x : max_divisions - x;
-    std::vector<Point3> new_points =
+    std::vector<CPP_Point3> new_points =
         rm == ico::rotation_method::gnomonic
-            ? Point3::all_row_points_gnomonic(left_points[x], right_points[x],
-                                              num_divs)
-            : Point3::all_row_points_quaternion(left_points[x], right_points[x],
-                                                num_divs);
+            ? CPP_Point3::all_row_points_gnomonic(left_points[x],
+                                                  right_points[x], num_divs)
+            : CPP_Point3::all_row_points_quaternion(left_points[x],
+                                                    right_points[x], num_divs);
     points.push_back(rm == ico::rotation_method::gnomonic
-                         ? Point3::spherify1D(new_points)
+                         ? CPP_Point3::spherify1D(new_points)
                          : new_points);
   }
   return points;
 }
 
 Triangle::lazy_points_around_result
-Triangle::lazy_points_around(Point3 &p, int res,
+Triangle::lazy_points_around(CPP_Point3 &p, int res,
                              ico::rotation_method rotation) const {
 
   const int nd = hexmapf::num_divisions(res);
@@ -151,13 +153,14 @@ Triangle::lazy_points_around(Point3 &p, int res,
                                         : round(percents.percent_CA * nd);
 
   // lazy calculate points
-  Point3::lazy_side_points_result side_point_result =
+  CPP_Point3::lazy_side_points_result side_point_result =
       rotation == ico::rotation_method::gnomonic
-          ? Point3::lazy_side_points_gnomonic(*this, estimated_vert_center, res)
-          : Point3::lazy_side_points_quaternion(*this, estimated_vert_center,
-                                                res);
+          ? CPP_Point3::lazy_side_points_gnomonic(*this, estimated_vert_center,
+                                                  res)
+          : CPP_Point3::lazy_side_points_quaternion(*this,
+                                                    estimated_vert_center, res);
 
-  std::vector<std::vector<Point3>> points;
+  std::vector<std::vector<CPP_Point3>> points;
 
   const int estimated_horz_center = round(percents.percent_CB * nd);
   // while vertical points exist, generate points for their rows in range
@@ -168,25 +171,25 @@ Triangle::lazy_points_around(Point3 &p, int res,
   for (unsigned int i = 0; i < side_point_result.pointsL.size(); i++) {
     // generates points for range between left and right points along vertical
     // triangle sides (AB an AC)
-    Point3 left = this->direction == tri::pointing::UP
-                      ? side_point_result.pointsL[i]
-                      : side_point_result.pointsR[i];
-    Point3 right = this->direction == tri::pointing::UP
-                       ? side_point_result.pointsR[i]
-                       : side_point_result.pointsL[i];
+    CPP_Point3 left = this->direction == tri::pointing::UP
+                          ? side_point_result.pointsL[i]
+                          : side_point_result.pointsR[i];
+    CPP_Point3 right = this->direction == tri::pointing::UP
+                           ? side_point_result.pointsR[i]
+                           : side_point_result.pointsL[i];
     int num_div = this->direction == tri::pointing::UP
                       ? side_point_result.lower_indx + i
                       : nd - (side_point_result.lower_indx + i);
 
-    Point3::lazy_row_points_result row_points_result =
+    CPP_Point3::lazy_row_points_result row_points_result =
         rotation == ico::rotation_method::gnomonic
-            ? Point3::lazy_row_points_gnomonic(estimated_horz_center, left,
-                                               right, num_div)
-            : Point3::lazy_row_points_quaternion(estimated_horz_center, left,
-                                                 right, num_div);
+            ? CPP_Point3::lazy_row_points_gnomonic(estimated_horz_center, left,
+                                                   right, num_div)
+            : CPP_Point3::lazy_row_points_quaternion(estimated_horz_center,
+                                                     left, right, num_div);
 
     points.push_back(rotation == ico::rotation_method::gnomonic
-                         ? Point3::spherify1D(row_points_result.row_points)
+                         ? CPP_Point3::spherify1D(row_points_result.row_points)
                          : row_points_result.row_points);
     // better way to set lower_horz_bound? only need last value...
     lower_horz_bound = row_points_result.lower_indx;
@@ -197,39 +200,39 @@ Triangle::lazy_points_around(Point3 &p, int res,
           .start_horz = lower_horz_bound};
 }
 
-Point3 Triangle::generate_point(int res, int lower_vert, int lower_horz,
-                                ico::rotation_method rotation) const {
+CPP_Point3 Triangle::generate_point(int res, int lower_vert, int lower_horz,
+                                    ico::rotation_method rotation) const {
   const int nd = hexmapf::num_divisions(res);
   // kind of hacky but works
-  Point3::lazy_side_points_result vert_result =
+  CPP_Point3::lazy_side_points_result vert_result =
       rotation == ico::rotation_method::gnomonic
-          ? Point3::lazy_side_points_gnomonic(*this, lower_vert, res, 0,
-                                              lower_vert, lower_vert)
-          : Point3::lazy_side_points_quaternion(*this, lower_vert, res, 0,
-                                                lower_vert, lower_vert);
+          ? CPP_Point3::lazy_side_points_gnomonic(*this, lower_vert, res, 0,
+                                                  lower_vert, lower_vert)
+          : CPP_Point3::lazy_side_points_quaternion(*this, lower_vert, res, 0,
+                                                    lower_vert, lower_vert);
 
-  const Point3 left = this->direction == tri::pointing::UP
-                          ? vert_result.pointsL[0]
-                          : vert_result.pointsR[0];
-  const Point3 right = this->direction == tri::pointing::UP
-                           ? vert_result.pointsR[0]
-                           : vert_result.pointsL[0];
-  Point3::lazy_row_points_result horz_result =
+  const CPP_Point3 left = this->direction == tri::pointing::UP
+                              ? vert_result.pointsL[0]
+                              : vert_result.pointsR[0];
+  const CPP_Point3 right = this->direction == tri::pointing::UP
+                               ? vert_result.pointsR[0]
+                               : vert_result.pointsL[0];
+  CPP_Point3::lazy_row_points_result horz_result =
       rotation == ico::rotation_method::gnomonic
-          ? Point3::lazy_row_points_gnomonic(lower_horz, left, right,
-                                             this->direction ==
-                                                     tri::pointing::UP
-                                                 ? vert_result.lower_indx
-                                                 : nd - vert_result.lower_indx,
-                                             0, lower_horz, lower_horz)
-          : Point3::lazy_row_points_quaternion(
+          ? CPP_Point3::lazy_row_points_gnomonic(
+                lower_horz, left, right,
+                this->direction == tri::pointing::UP
+                    ? vert_result.lower_indx
+                    : nd - vert_result.lower_indx,
+                0, lower_horz, lower_horz)
+          : CPP_Point3::lazy_row_points_quaternion(
                 lower_horz, left, right,
                 this->direction == tri::pointing::UP
                     ? vert_result.lower_indx
                     : nd - vert_result.lower_indx,
                 0, lower_horz, lower_horz);
 
-  Point3 spherified = horz_result.row_points[0];
+  CPP_Point3 spherified = horz_result.row_points[0];
   if (rotation == ico::rotation_method::gnomonic) {
     spherified.spheriphy();
   }
@@ -237,9 +240,9 @@ Point3 Triangle::generate_point(int res, int lower_vert, int lower_horz,
   return spherified;
 };
 
-bool Triangle::contains_point(Point3 &point) const {
+bool Triangle::contains_point(CPP_Point3 &point) const {
   // vec and tri intersection point
-  const Point3 intersection = this->plane_intersection(point);
+  const CPP_Point3 intersection = this->plane_intersection(point);
 
   if (intersection.on_opposite_side(point)) {
     return false;
@@ -271,7 +274,7 @@ bool Triangle::contains_point(Point3 &point) const {
   return equal_nuff;
 };
 
-Point3 Triangle::plane_intersection(Point3 vec) const {
+CPP_Point3 Triangle::plane_intersection(CPP_Point3 vec) const {
   // x component
   const long double l = (this->A.y - this->B.y) * (this->C.z - this->B.z) -
                         (this->A.z - this->B.z) * (this->C.y - this->B.y);
@@ -291,15 +294,15 @@ Point3 Triangle::plane_intersection(Point3 vec) const {
   const long double t_x = vec.x * v;
   const long double t_y = vec.y * v;
   const long double t_z = vec.z * v;
-  return Point3(t_x, t_y, t_z);
+  return CPP_Point3(t_x, t_y, t_z);
 };
 
 long double Triangle::area() const {
-  Point3 AB = this->B;
+  CPP_Point3 AB = this->B;
   AB.subtract(this->A);
-  Point3 BC = this->C;
+  CPP_Point3 BC = this->C;
   BC.subtract(this->B);
-  Point3 temp = AB;
+  CPP_Point3 temp = AB;
   temp.cross(BC);
 
   const long double mag = temp.mag();

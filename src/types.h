@@ -4,12 +4,12 @@
 enum map_orientation { ECEF, dymaxion };
 enum rotation_method { gnomonic, quaternion };
 
-struct C_Icosahedron {
+struct Icosahedron {
   enum map_orientation mo;
   enum rotation_method rm;
 };
 
-struct C_hash_properties {
+struct hash_properties {
   enum map_orientation mo;
   enum rotation_method rm;
   int row;
@@ -17,20 +17,20 @@ struct C_hash_properties {
   int res;
 };
 
-struct C_Point3 {
+struct Point3 {
   long double x;
   long double y;
   long double z;
   int tri_num;
-  int is_pc; // bool -> 0 = false, 1 = true
+  int is_PC; // bool -> 0 = false, 1 = true
 };
 
-struct C_GPoint3 {
+struct GPoint3 {
   long double x;
   long double y;
   long double z;
   int tri_num;
-  int is_pc; // bool -> 0 = false, 1 = true  int row;
+  int is_PC; // bool -> 0 = false, 1 = true  int row;
   int row;
   int col;
   int res;
